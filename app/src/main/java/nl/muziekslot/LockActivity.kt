@@ -17,6 +17,7 @@ import android.widget.*
 class LockActivity : Activity() {
     private lateinit var bg: ImageView
     private lateinit var art: ImageView
+    private lateinit var clock: TextClock
     private lateinit var title: TextView
     private lateinit var artist: TextView
     private lateinit var seek: SeekBar
@@ -89,6 +90,12 @@ class LockActivity : Activity() {
                 override fun getOutline(v: View, o: Outline) = o.setRoundRect(0, 0, v.width, v.height, dp(16).toFloat())
             }
         }
+        clock = TextClock(this).apply {
+            format24Hour = "HH:mm"; format12Hour = "HH:mm"
+            textSize = 80f; setTextColor(Color.WHITE); gravity = Gravity.CENTER
+            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            letterSpacing = -0.03f; includeFontPadding = false
+        }
         title = label("", 24f, true); artist = label("", 18f).apply { alpha = 0.7f }
         seek = SeekBar(this).apply {
             progressTintList = ColorStateList.valueOf(Color.WHITE)
@@ -113,6 +120,7 @@ class LockActivity : Activity() {
 
         col = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL; setPadding(dp(32), dp(72), dp(32), dp(40))
+            addView(clock, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = dp(24) })
             addView(art, LinearLayout.LayoutParams(-1, 0, 1f).apply { bottomMargin = dp(28) })
             addView(title); addView(artist); addView(seek, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(20) })
             addView(row, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(16) })
@@ -171,15 +179,16 @@ class LockActivity : Activity() {
         val a = window.attributes
         a.screenBrightness = if (d) 0.01f else WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
         window.attributes = a
-        val vis = if (d) View.GONE else View.VISIBLE
-        bg.visibility = vis; shade.visibility = vis; seek.visibility = vis; row.visibility = vis; hint.visibility = vis
-        val lp = art.layoutParams as LinearLayout.LayoutParams
-        if (d) { lp.width = dp(160); lp.height = dp(160); lp.weight = 0f; lp.gravity = Gravity.CENTER_HORIZONTAL }
-        else { lp.width = -1; lp.height = 0; lp.weight = 1f; lp.gravity = -1 }
-        art.layoutParams = lp
-        col.gravity = if (d) Gravity.CENTER else Gravity.TOP
-        title.alpha = if (d) 0.6f else 1f
-        artist.alpha = if (d) 0.4f else 0.7f
+        // Achtergrond weg; bediening onzichtbaar maar behoudt zijn plek, zodat hoes, tijd en titel niet verschuiven
+        val gone = if (d) View.GONE else View.VISIBLE
+        val invis = if (d) View.INVISIBLE else View.VISIBLE
+        bg.visibility = gone; shade.visibility = gone
+        seek.visibility = invis; row.visibility = invis; hint.visibility = invis
+        // Hoes zwart-wit
+        art.colorFilter = if (d) ColorMatrixColorFilter(ColorMatrix().apply { setSaturation(0f) }) else null
+        clock.alpha = if (d) 0.7f else 1f
+        title.alpha = if (d) 0.7f else 1f
+        artist.alpha = if (d) 0.5f else 0.7f
         art.alpha = if (d) 0.6f else 1f
     }
 
