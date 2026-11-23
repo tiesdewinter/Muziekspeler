@@ -5,6 +5,7 @@ import android.app.KeyguardManager
 import android.content.*
 import android.graphics.*
 import android.media.MediaMetadata
+import android.media.session.MediaController
 import android.media.session.*
 import android.os.*
 import android.view.*
